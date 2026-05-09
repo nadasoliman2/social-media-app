@@ -2,8 +2,11 @@ import { Query } from 'mongoose';
 import {z} from 'zod';
 import {Types} from "mongoose"
 export const generalValidation = {
-id:z.string().refine(value=>{return  Types.ObjectId.isValid(value)},"Invalid ObjectId")
-    otp: z.string().regex(/^\d{6}$/),
+id: z.string().refine(
+  value => Types.ObjectId.isValid(value),
+  "Invalid ObjectId"
+),   
+ otp: z.string().regex(/^\d{6}$/),
 
  email:z.email({error:"invalid email format"}),
 phone: z

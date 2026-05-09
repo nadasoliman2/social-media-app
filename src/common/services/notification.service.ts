@@ -5,7 +5,7 @@ import {FIREBASE_PROJECT_ID,FIREBASE_PRIVATE_KEY,FIREBASE_CLIENT_EMAIL} from "..
 export class Notification{
     private client:admin.app.App
     constructor(){
-var serviceAccount =JSON.parse( readFileSync(resolve("./src/config/social-media-app-eae43-firebase-adminsdk-fbsvc-fbe43f9ba1.json"))as unknown as string);
+// var serviceAccount =JSON.parse( readFileSync(resolve("./src/config/social-media-app-eae43-firebase-adminsdk-fbsvc-fbe43f9ba1.json"))as unknown as string);
 
 this.client = admin.initializeApp({
   credential: admin.credential.cert({

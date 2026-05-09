@@ -28,7 +28,9 @@ class UserService{
      this.commentRepository = new CommentRepository()
     }
   async  profile(user:HydratedDocument<IUser>):Promise<IUser>{
-return user.toJSON()
+
+ 
+ return user.toJSON()
     }
 
 async rotateToken(user: HydratedDocument<IUser>, {sub,jti,iat}:{jti:string,iat:number,sub:string}, issuer:string) {

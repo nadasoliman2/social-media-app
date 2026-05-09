@@ -10,6 +10,12 @@ params:z.strictObject({
 
 })
 }
+export const reactPostGQL = z.strictObject({
+   
+    react: z.coerce.number().min(0).max(7),
+    postId: generalValidation.id
+
+})
 export const reactPost = {
 query:z.strictObject({
    

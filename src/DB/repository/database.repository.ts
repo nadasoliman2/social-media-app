@@ -1,6 +1,7 @@
 
 import {UpdateWithAggregationPipeline,
     ReturnsNewDoc,
+    populateOptions,
     MongooseUpdateQueryOptions,
     UpdateQuery, Types,Model, HydratedDocument ,FlattenMaps,CreateOptions, AnyKeys,QueryFilter,ProjectionType,QueryOptions,mongodb} from "mongoose";
 
@@ -176,11 +177,13 @@ async findbyid({ _id, projection, options }:
 async findOneAndUpdate({
   filter,
   update,
-  options = { new: true }
+  options = { new: true },
+  populate=[]
 }: {
   filter: QueryFilter<TRawDoc>,
   update: UpdateQuery<TRawDoc> | any[],
-  options?: QueryOptions<TRawDoc> & ReturnsNewDoc
+  options?: QueryOptions<TRawDoc> & ReturnsNewDoc,
+  populate?:populateOptions[]
 }): Promise<HydratedDocument<TRawDoc> | null> {
 
   // PIPELINE MODE

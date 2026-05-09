@@ -26,6 +26,7 @@ router.get('/dashboard',
 ,
     async(req:Request,res:Response,next:NextFunction)=>{
 const data = await userService.dashboard(req.user)
+console.log(req.user)
 return successResponse({res,data:{data}})
 })
 router.patch('/profile-image',

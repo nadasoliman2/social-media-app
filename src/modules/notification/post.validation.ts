@@ -22,6 +22,8 @@ params:z.strictObject({
 
 })
 }
+
+
 export const createPost = {
   body: z
     .strictObject({

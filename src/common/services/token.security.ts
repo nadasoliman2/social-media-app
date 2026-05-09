@@ -157,7 +157,7 @@ export const decodeToken = async (
 
   const user:HydratedDocument<IUser> | null = await UserModel.findById(
     sub,
-    { gender: 0, email: 0 }
+    { password: 0 }
   ) 
 
   if (!user) {

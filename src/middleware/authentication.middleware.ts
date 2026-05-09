@@ -1,11 +1,11 @@
 import {TokenTypeEnum,RoleEnum} from '../common/enums/index.js'
 import {decodeToken} from '../common/services/token.security.js'
 import AuthenticationService from '../modules/auth/auth.service.js'
-import {BadRequestException,UnauthorizedException} from '../common/exception/index.js'
+import {ForbiddenException,MapGraphQLError,BadRequestException,UnauthorizedException} from '../common/exception/index.js'
 import { NextFunction, Request, Response } from 'express'
 import { HydratedDocument } from 'mongoose'
 import {IUser} from '../common/interfaces/index.js'
-
+import {GraphQLError} from 'graphql'
 declare global {
   namespace Express {
     interface Request {
@@ -51,5 +51,13 @@ export const authorization = (accessRoles: RoleEnum[] = []) => {
 }
  next()
 }
+
+}
+export const GQLauthorization = async(accessRoles: RoleEnum[] = [],user:HydratedDocument<IUser>) :Promise<boolean>=> {
+  if(!accessRoles.includes(user.role as any)){
+   throw MapGraphQLError(new ForbiddenException("Not authorized account"))
+}
+ return true
+
 
 }

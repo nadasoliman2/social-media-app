@@ -17,7 +17,7 @@ provider:ProviderEnum
 changeCredentialsTime?:Date;
 DOB:Date;
 confirmEmail?:Date;
-creadtedAt:Date;
+createdAt:Date;
 updatedAt:Date;
 extra:{name:string};
 deletedAt?:Date;

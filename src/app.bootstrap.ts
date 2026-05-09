@@ -1,5 +1,5 @@
 import express from 'express';
-import {commentRouter,postRouter,authRouter,userRouter,notificationRouter} from './modules/index.js';
+import {commentRouter,postRouter,authRouter,userRouter,notificationRouter,schema} from './modules/index.js';
 import {globalErrorHandler} from './middleware/index.js';
 import { connectDB , redisconnection} from './DB/index.js';
 import { UserModel } from './DB/model/user.model.js';
@@ -11,17 +11,29 @@ import { notificationService } from './common/services/notification.service.js';
 import {pipeline} from 'node:stream';
 import {promisify} from 'node:util'
 import{UserRepository} from './DB/repository/user.repository.js';
+import { successResponse } from './common/response/success.response.js';
+import { createHandler } from "graphql-http/lib/use/express";
+import { authentication,authorization } from "./middleware/authentication.middleware.js"
+
 const s3WriteStream = promisify(pipeline)
 const boostrap = async (): Promise<void> => {
     const app: express.Express = express();
+
     app.use(cors());
     app.use(express.json());
+  
+    app.all("/graphql",authentication(),createHandler({schema:schema ,context:(req)=>({
+user:req.raw.user,
+decoded:req.raw.decoded
+    })}))
     app.use('/auth', authRouter);
 app.use('/post',postRouter)
 app.use('/comment',commentRouter)
  app.use('/user', userRouter);
   app.use('/notification', notificationRouter);
-
+// app.use('/sayHi',(req: express.Request, res: express.Response, next: express.NextFunction)=>{
+// return successResponse({res,data:{message:"hello world"}})
+// })
 app.get('/uploads/*path',async(req: express.Request, res: express.Response, next: express.NextFunction):Promise<express.Response> => {
   const {download,fileName}= req.query as {download?:string,fileName?:string}
   const {path}=req.params as {path:string[]}
