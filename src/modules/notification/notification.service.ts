@@ -67,6 +67,43 @@ async getNotifications(
     unreadCount
   }
 }
+async getNotificationPost(notificationId: string, user: HydratedDocument<IUser>) {
+  const notification = await this.notificationRepository.findOne({
+    filter: {
+      _id: toObjectId(notificationId),
+      recipient: user._id
+    },
+    options: {
+      populate: [{ path: "post" }]
+    }
+  })
 
+  if (!notification) {
+    throw new NotFoundException("Notification not found")
+  }
+
+  return notification.post
+}
+async markAsRead(notificationId: string, user: HydratedDocument<IUser>) {
+
+  const notification = await this.notificationRepository.findOneAndUpdate({
+    filter: {
+      _id: toObjectId(notificationId),
+      recipient: user._id
+    },
+    update: {
+      isRead: true
+    },
+    options: {
+      new: true
+    }
+  })
+
+  if (!notification) {
+    throw new NotFoundException("Notification not found")
+  }
+
+  return notification
+}
 }
 export default new NotificationService()

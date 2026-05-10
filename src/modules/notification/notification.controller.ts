@@ -22,5 +22,28 @@ const data =await NotificationService.getNotifications( req.query,req.user as  H
 }
 
 )
+router.get(
+  '/:id/post',
+  authentication(),
+  async (req, res) => {
+    const data = await NotificationService.getNotificationPost(
+      req.params.id,
+      req.user as HydratedDocument<IUser>
+    )
+    return successResponse({ res, status: 200, data })
+  }
+)
+router.patch(
+  '/:id/read',
+  authentication(),
+  async (req, res) => {
+    const data = await NotificationService.markAsRead(
+      req.params.id,
+      req.user as HydratedDocument<IUser>
+    )
+
+    return successResponse({ res, status: 200, data })
+  }
+)
 
 export default router
