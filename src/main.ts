@@ -1,2 +1,2 @@
-import boostrap from './app.bootstrap.js';
- await boostrap()
+// import boostrap from './app.bootstrap.js';
+//  await boostrap()

@@ -16,7 +16,6 @@ import { createHandler } from "graphql-http/lib/use/express";
 import { authentication,authorization } from "./middleware/authentication.middleware.js"
 
 const s3WriteStream = promisify(pipeline)
-const boostrap = async (): Promise<void> => {
     const app: express.Express = express();
 
     app.use(cors());
@@ -95,9 +94,10 @@ const userrepo = new UserRepository()
 //   force:true}
 // })
 //  console.log(user)
-    app.listen(3000,()=>{
-        console.log("Application is listening on port 3000");
-    })
-    console.log("Bootstrapping the application...");
-}
-export default boostrap;
+    // app.listen(3000,()=>{
+    //     console.log("Application is listening on port 3000");
+    // })
+    // console.log("Bootstrapping the application...");
+
+
+export default app;
