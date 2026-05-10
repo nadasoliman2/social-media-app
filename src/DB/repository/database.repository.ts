@@ -1,10 +1,12 @@
 
 import {UpdateWithAggregationPipeline,
     ReturnsNewDoc,
-    populateOptions,
+   
     MongooseUpdateQueryOptions,
-    UpdateQuery, Types,Model, HydratedDocument ,FlattenMaps,CreateOptions, AnyKeys,QueryFilter,ProjectionType,QueryOptions,mongodb} from "mongoose";
-
+    UpdateQuery, Types,Model, HydratedDocument ,FlattenMaps,CreateOptions, AnyKeys,QueryFilter,ProjectionType,QueryOptions} from "mongoose";
+import type { PopulateOptions } from "mongoose";
+import type * as mongodb from "mongodb";
+import type { UpdateOptions, DeleteResult } from "mongodb";
 export abstract class DatabaseRepository<TRawDoc>{
     constructor(protected readonly model:Model<TRawDoc>){
 
@@ -183,7 +185,7 @@ async findOneAndUpdate({
   filter: QueryFilter<TRawDoc>,
   update: UpdateQuery<TRawDoc> | any[],
   options?: QueryOptions<TRawDoc> & ReturnsNewDoc,
-  populate?:populateOptions[]
+  populate?:PopulateOptions[]
 }): Promise<HydratedDocument<TRawDoc> | null> {
 
   // PIPELINE MODE

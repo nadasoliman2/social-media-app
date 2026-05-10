@@ -26,8 +26,10 @@ router.get(
   '/:id/post',
   authentication(),
   async (req, res) => {
+        const {id} = req.params
+
     const data = await NotificationService.getNotificationPost(
-      req.params.id,
+     id as string ,
       req.user as HydratedDocument<IUser>
     )
     return successResponse({ res, status: 200, data })
@@ -37,8 +39,9 @@ router.patch(
   '/:id/read',
   authentication(),
   async (req, res) => {
+    const {id} = req.params
     const data = await NotificationService.markAsRead(
-      req.params.id,
+      id as string,
       req.user as HydratedDocument<IUser>
     )
 

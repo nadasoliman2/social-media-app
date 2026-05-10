@@ -2,7 +2,7 @@ import * as postGQLTypes from './post.types.gql.js'
 import * as postGQLArgs from './post.args.gql.js'
 import {postResolver,PostResolver} from './post.resolver.js'
 export class PostGQLSchema {
-    private postresolver:postResolver
+    private postresolver: typeof postResolver
         constructor(){
 this.postresolver = postResolver
     }

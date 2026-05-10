@@ -7,7 +7,7 @@ import * as validators from "./comment.validation.js"
 import CommentService from "./comment.service.js"
 
 import { paginateDto} from "../../common/validation/general.validation.js"
-import {createCommentBodyDto,createCommentParamsDto,UpdateCommentParamsDto ,DeleteCommentParamsDto ,ReplyCommentParamsDto} from './comment.dto.js'
+import {createCommentBodyDto,createCommentParamsDto,UpdateCommentParamsDto ,DeleteCommentParamsDto ,ReplyCommentParamsDto,ReactPostParamsDto,ReactPostQueryDto} from './comment.dto.js'
 const router = Router()
 router.patch('/:commentId/post/:postId',
     authentication(),

@@ -19,138 +19,141 @@ export class S3Service {
       }
     });
   }
+async uploadAsset({
+  storageApproach = StorageApproachEnum.MEMORY,
+  Bucket = AWS_BUCKET_NAME,
+  path = "general",
+  file,
+  ACL = ObjectCannedACL.private,
+  ContentType
+}: {
+  storageApproach?: StorageApproachEnum;
+  Bucket?: string;
+  path?: string;
+  file: Express.Multer.File;
+  ACL?: ObjectCannedACL;
+  ContentType?: string | undefined;
+}): Promise<string> {
 
-  async uploadAsset({
-    storageApproach = StorageApproachEnum.MEMORY,
-    Bucket = AWS_BUCKET_NAME,
-    path = "general",
-    file,
-    ACL = ObjectCannedACL.private,
-    ContentType
-  }: {
-    storageApproach?: StorageApproachEnum;
-    Bucket?: string;
-    path?: string;
-    file: Express.Multer.File;
-    ACL?: ObjectCannedACL;
-    ContentType?: string | undefined;
-  }) {
-
-    if (!file) {
-      throw new BadRequestException("No file provided");
-    }
-
-    const key = `${APPLICATION_NAME}/${path}/${randomUUID()}__${file.originalname}`;
-
-    const command = new PutObjectCommand({
-      Bucket,
-      Key: key,
-      ACL,
-      Body:
-    //   file.buffer
-        storageApproach === StorageApproachEnum.MEMORY
-          ? file.buffer
-          : createReadStream(file.path),
-      ContentType: file.mimetype || ContentType
-    });
-
-    await this.client.send(command);
-
-    return key;
+  if (!file) {
+    throw new BadRequestException("No file provided");
   }
- async uploadLargeAsset({
-    storageApproach = StorageApproachEnum.DISK,
-    Bucket = AWS_BUCKET_NAME,
-    path = "general",
-    file,
-    ACL = ObjectCannedACL.private,
-    ContentType,
-    partSize=5
-  }: {
-    storageApproach?: StorageApproachEnum;
-    Bucket?: string;
-    path?: string;
-    file: Express.Multer.File;
-    ACL?: ObjectCannedACL;
-    ContentType?: string;
-    partSize?: number;
-  }):Promise<CompleteMultipartUploadCommandOutput> {
-    const key = `${APPLICATION_NAME}/${path}/${randomUUID()}__${file.originalname}`;
 
-const uploadFile = new Upload({
-client:this.client,
-params:{
-  Bucket,
-      Key: key,
-      ACL,
-      Body:
-    //   file.buffer
-        storageApproach === StorageApproachEnum.MEMORY
-          ? file.buffer
-          : createReadStream(file.path),
-      ContentType: file.mimetype || ContentType
-},
-partSize: partSize* 1024 * 1024 // 5MB
-})
-uploadFile.on("httpUploadProgress",(progress)=>{
-  console.log(progress)
-  if (progress.total) {
-    console.log(`file upload is ${Math.round((progress.loaded / progress.total) * 100)}% done`)
-  }
-})
-return  await uploadFile.done();
-    
-  }
- async uploadAssets({
-      uploadApproach=UploadApproachEnum.SMALL,
-    storageApproach = StorageApproachEnum.MEMORY,
-    Bucket = AWS_BUCKET_NAME,
-    path = "general",
-    files,
-    ACL = ObjectCannedACL.private,
-    ContentType
-  }: {
-    uploadApproach?: UploadApproachEnum;
-    storageApproach?: StorageApproachEnum;
-    Bucket?: string;
-    path?: string;
-    files: Express.Multer.File[];
-    ACL?: ObjectCannedACL;
-    ContentType?: string;
-  }):Promise<string[]> {
+  const key = `${APPLICATION_NAME}/${path}/${randomUUID()}__${file.originalname}`;
 
-   let  urls:string[]=[]
-   if(uploadApproach === UploadApproachEnum.LARGE){
-     urls= await Promise.all(
-      files.map(file=>this.uploadLargeAsset(
-        {    storageApproach ,
-      Bucket,
-      path ,
-      file,
-      ACL ,
-      ContentType}
-      ))
-     )
-   }
-   else{
- urls=   await Promise.all(
-    files.map(file=>{
-return   this.uploadAsset(
-      {    storageApproach ,
+  const command = new PutObjectCommand({
     Bucket,
-    path ,
-    file,
-    ACL ,
-    ContentType}
+    Key: key,
+    ACL,
+    Body:
+      storageApproach === StorageApproachEnum.MEMORY
+        ? file.buffer
+        : createReadStream(file.path),
+    ContentType: file.mimetype || ContentType
+  });
 
-    )}
-  )
+  await this.client.send(command);
 
-   )}
-return urls
+  return key;
 }
+async uploadLargeAsset({
+  storageApproach = StorageApproachEnum.DISK,
+  Bucket = AWS_BUCKET_NAME,
+  path = "general",
+  file,
+  ACL = ObjectCannedACL.private,
+  ContentType,
+  partSize = 5
+}: {
+  storageApproach?: StorageApproachEnum;
+  Bucket?: string;
+  path?: string;
+  file: Express.Multer.File;
+  ACL?: ObjectCannedACL;
+  ContentType?: string;
+  partSize?: number;
+}): Promise<CompleteMultipartUploadCommandOutput> {
 
+  const key = `${APPLICATION_NAME}/${path}/${randomUUID()}__${file.originalname}`;
 
+  const uploadFile = new Upload({
+    client: this.client,
+    params: {
+      Bucket,
+      Key: key,
+      ACL,
+      Body:
+        storageApproach === StorageApproachEnum.MEMORY
+          ? file.buffer
+          : createReadStream(file.path),
+      ContentType: file.mimetype || ContentType
+    },
+    partSize: partSize * 1024 * 1024
+  });
+
+  uploadFile.on("httpUploadProgress", (progress) => {
+    if (progress.total) {
+      console.log(
+        `file upload is ${Math.round((progress.loaded / progress.total) * 100)}% done`
+      );
+    }
+  });
+
+  return await uploadFile.done();
+}
+async uploadAssets({
+  uploadApproach = UploadApproachEnum.SMALL,
+  storageApproach = StorageApproachEnum.MEMORY,
+  Bucket = AWS_BUCKET_NAME,
+  path = "general",
+  files,
+  ACL = ObjectCannedACL.private,
+  ContentType
+}: {
+  uploadApproach?: UploadApproachEnum;
+  storageApproach?: StorageApproachEnum;
+  Bucket?: string;
+  path?: string;
+  files: Express.Multer.File[];
+  ACL?: ObjectCannedACL;
+  ContentType?: string;
+}): Promise<string[]> {
+
+  let urls: string[] = [];
+
+  if (uploadApproach === UploadApproachEnum.LARGE) {
+    urls = await Promise.all(
+      files.map(async (file) => {
+        const result = await this.uploadLargeAsset({
+          storageApproach,
+          Bucket,
+          path,
+          file,
+          ACL,
+          ContentType
+        });
+
+        return (result as any).Location || (result as any).Key || "";
+      })
+    );
+
+  } else {
+    urls = await Promise.all(
+      files.map(file =>
+        this.uploadAsset({
+          storageApproach,
+          Bucket,
+          path,
+          file,
+          ACL,
+          ContentType
+        })
+      )
+    );
+  }
+
+  return urls;
+}
 async createPreSignedUploadLink({
   Bucket = AWS_BUCKET_NAME,
   path = "general",

@@ -1,4 +1,4 @@
-import userService ,{UserService}from "../user.service.js"
+import userService  from "../user.service.js"
 import { HydratedDocument } from "mongoose"
 import {IUser} from "../../../common/interfaces/user.interface.js"
 import {decodeToken} from '../../../common/services/index.js'
@@ -7,7 +7,7 @@ import {endpoint} from '../user.authorization.js'
 import {profileGQL} from '../user.validation.js'
 import {GQLValidation} from '../../../middleware/validation.middleware.js'
 class UserResolver{
-    private userService:UserService
+    private userService: typeof userService
     constructor(){
         this.userService=userService
     }

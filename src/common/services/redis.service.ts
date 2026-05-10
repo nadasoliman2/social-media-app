@@ -3,7 +3,7 @@ import { EmailEnum } from "../enums/email.enum.js";
 import { Types } from "mongoose";
 
 /* =========================
-   🔐 Keys Builders
+   🔐 Types
 ========================= */
 
 interface SetOptions {
@@ -11,202 +11,211 @@ interface SetOptions {
   value: unknown;
   ttl?: number;
 }
-type RedisKeyType ={email:string,subject?:EmailEnum}
-export class RedisService {
-  constructor(){
 
-  }
-  revokeTokenKey = ({
-  userId,
-  jti,
-}: {
-  userId: Types.ObjectId | string,
-  jti: string
-}): string => {
-  return `RevokeToken::${userId}::${jti}`;
-};
 
-  otpKey = ({
-  email,
-  subject = EmailEnum.ConfirmEmail,
-}: RedisKeyType):string => {
-  return `OTP::User::${email}::${subject}`;
-};
-
-  blockOtpKey = ({
-  email,
-  subject = EmailEnum.ConfirmEmail,
-}: RedisKeyType):string=> {
-  return `OTP::User::${email}::${subject}::Block`;
-};
-
-  maxAttemptOtpKey = ({
-  email,
-  subject = EmailEnum.ConfirmEmail,
-}: RedisKeyType) :string=> {
-  return `OTP::User::${email}::${subject}::MaxTrial`;
-};
-
-  baseRevokeTokenKey = (userId: Types.ObjectId | string): string => {
-  return `RevokeToken::${userId}`;
-};
 
 /* =========================
-   🔧 Redis Operations
+   🚀 Service
 ========================= */
 
-  set = async ({
+export class RedisService {
+  constructor() {}
+
+  /* =========================
+     🔑 Keys
+  ========================= */
+
+  revokeTokenKey = ({
+    userId,
+    jti,
+  }: {
+    userId: Types.ObjectId | string;
+    jti: string;
+  }): string => {
+    return `RevokeToken::${userId}::${jti}`;
+  };
+
+  otpKey = ({
+    email,
+    subject = EmailEnum.ConfirmEmail,
+  }: {
+    email: string;
+  subject?: EmailEnum | string;
+  }): string => {
+    return `OTP::User::${email}::${subject}`;
+  };
+
+  blockOtpKey = ({
+    email,
+    subject = EmailEnum.ConfirmEmail,
+  }: {
+    email: string;
+  subject?: EmailEnum | string;
+  }): string => {
+    return `OTP::User::${email}::${subject}::Block`;
+  };
+
+  maxAttemptOtpKey = ({
+    email,
+    subject = EmailEnum.ConfirmEmail,
+  }:
+   {
+    email: string;
+  subject?: EmailEnum | string;
+  }): string => {
+    return `OTP::User::${email}::${subject}::MaxTrial`;
+  };
+
+  baseRevokeTokenKey = (userId: Types.ObjectId | string): string => {
+    return `RevokeToken::${userId}`;
+  };
+
+  FCM_key = (userId: Types.ObjectId | string): string => {
+    return `user:FCM:${userId}`;
+  };
+
+  /* =========================
+     🧠 Core Redis Ops
+  ========================= */
+
+set = async ({
   key,
   value,
   ttl,
-}: SetOptions): Promise<string | null> => {
+}: SetOptions): Promise<void> => {
   try {
-    const data =
-      typeof value === "string" ? value : JSON.stringify(value);
+    const data = JSON.stringify(value);
 
-    return ttl
-      ? await redisclient.set(key, data, { EX: ttl })
-      : await redisclient.set(key, data);
+    if (ttl !== undefined) {
+      await redisclient.set(key, data, { EX: ttl });
+    } else {
+      await redisclient.set(key, data);
+    }
   } catch (error) {
-    console.log(`fail in redis set operation ${error}`);
-    return null;
+    console.log(`redis set error: ${error}`);
   }
 };
+  update = async ({
+    key,
+    value,
+    ttl,
+  }: SetOptions): Promise<number> => {
+    try {
+      const exists = await redisclient.exists(key);
+      if (!exists) return 0;
 
- update = async ({
-  key,
-  value,
-  ttl,
-}: SetOptions): Promise<string | number | null> => {
+      const payload: SetOptions = { key, value };
+      if (ttl !== undefined) payload.ttl = ttl;
+
+      await this.set(payload);
+      return 1;
+    } catch (error) {
+      console.log(`redis update error: ${error}`);
+      return 0;
+    }
+  };
+
+get = async <T = unknown>(key: string): Promise<T | null> => {
   try {
-    const exists = await redisclient.exists(key);
-    if (!exists) return 0;
+    const data = await redisclient.get(key) as string | null;
 
-    return await this.set({ key, value, ...(ttl !== undefined && { ttl })})
-  } catch (error) {
-    console.log(`fail in redis update operation ${error}`);
-    return null;
-  }
-};
-
-
-  get = async <T = unknown>(
-  key: string
-): Promise<T | string | null> => {
-  try {
-    const data = await redisclient.get(key);
     if (!data) return null;
 
     try {
       return JSON.parse(data) as T;
     } catch {
-      return data;
+      return data as unknown as T;
     }
   } catch (error) {
     console.log(`fail in redis get operation ${error}`);
     return null;
   }
 };
+  ttl = async (key: string): Promise<number> => {
+    return redisclient.ttl(key);
+  };
 
-  ttl = async (key: string): Promise<number | null> => {
-  try {
-    return await redisclient.ttl(key);
-  } catch (error) {
-    console.log(`fail in redis ttl operation ${error}`);
-    return null;
-  }
-};
-
-  exist = async (key: string): Promise<number | null> => {
-  try {
-    return await redisclient.exists(key);
-  } catch (error) {
-    console.log(`fail in redis exist operation ${error}`);
-    return null;
-  }
-};
+  exist = async (key: string): Promise<number> => {
+    return redisclient.exists(key);
+  };
 
   expire = async ({
-  key,
-  ttl,
-}: {
-  key: string;
-  ttl: number;
-}): Promise<number | null> => {
-  try {
-    return await redisclient.expire(key, ttl);
-  } catch (error) {
-    console.log(`fail in redis expire operation ${error}`);
-    return null;
-  }
-};
+    key,
+    ttl,
+  }: {
+    key: string;
+    ttl: number;
+  }): Promise<number> => {
+    return redisclient.expire(key, ttl);
+  };
 
-  mGet = async (
-  keys: string[]
-): Promise<(string | null)[] | null> => {
+ mGet = async (keys: string[]): Promise<(string | null)[]> => {
   try {
     if (!keys.length) return [];
-    return await redisclient.mGet(keys);
+    return (await redisclient.mGet(keys)) as (string | null)[];
   } catch (error) {
     console.log(`fail in redis mGet operation ${error}`);
-    return null;
+    return [];
   }
 };
 
-  keys = async (
-  prefix: string
-): Promise<string[] | null> => {
+keys = async (prefix: string): Promise<string[]> => {
   try {
     return await redisclient.keys(`${prefix}*`);
   } catch (error) {
     console.log(`fail in redis keys operation ${error}`);
-    return null;
+    return [];
   }
 };
+  deleteKey = async (keys: string[]): Promise<number> => {
+    if (!keys.length) return 0;
 
-  deleteKey = async (
-  keys: string[]
-): Promise<number | null> => {
-  try {
-    if (!keys?.length) return 0;
-    return await redisclient.del(...keys);
-  } catch (error) {
-    console.log(`fail in redis del operation ${error}`);
-    return null;
-  }
-};
+    return redisclient.del(keys as [string, ...string[]]);
+  };
 
- incr = async (key: string): Promise<number | null> => {
-  try {
-    return await redisclient.incr(key);
-  } catch (error) {
-    console.log(`fail in redis incr operation ${error}`);
-    return null;
-  }
+  incr = async (key: string): Promise<number> => {
+    return redisclient.incr(key);
+  };
+
+  /* =========================
+     📱 FCM Helpers
+  ========================= */
+
+  addFCM = async (
+    userId: Types.ObjectId | string,
+    FCMToken: string
+  ) => {
+    return redisclient.sAdd(this.FCM_key(userId), FCMToken);
+  };
+
+  removeFCM = async (
+    userId: Types.ObjectId | string,
+    FCMToken: string
+  ) => {
+    return redisclient.sRem(this.FCM_key(userId), FCMToken);
+  };
+
+  getFCMs = async (
+    userId: Types.ObjectId | string
+  ): Promise<string[]> => {
+    return redisclient.sMembers(this.FCM_key(userId));
+  };
+
+  hasFCMs = async (
+    userId: Types.ObjectId | string
+  ): Promise<number> => {
+    return redisclient.sCard(this.FCM_key(userId));
+  };
+
+  removeFCMUser = async (
+    userId: Types.ObjectId | string
+  ): Promise<number> => {
+    return redisclient.del(this.FCM_key(userId));
+  };
 }
- FCM_key=(userId: Types.ObjectId | string)=> {
-    return  `user:FCM:${userId}`;
-}
-  addFCM=async(userId: Types.ObjectId | string, FCMToken: string)=> {
-    return await redisclient.sAdd(this.FCM_key(userId), FCMToken);
-}
 
-  removeFCM=async(userId: Types.ObjectId | string, FCMToken: string)=> {
-    return await redisclient.sRem(this.FCM_key(userId), FCMToken);
-}
+/* =========================
+   🧾 Export Singleton
+========================= */
 
-   getFCMs=async(userId: Types.ObjectId | string)=> {
-    return await redisclient.sMembers(this.FCM_key(userId));
-}
-
- hasFCMs =async(userId: Types.ObjectId | string)=> {
-    return await redisclient.sCard(this.FCM_key(userId));
-}
-
- removeFCMUser=async(userId: Types.ObjectId | string)=> {
-    return await redisclient.del(this.FCM_key(userId));
-}
-
-
-} 
-export default new RedisService()
+export default new RedisService();  

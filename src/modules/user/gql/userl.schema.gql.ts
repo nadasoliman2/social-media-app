@@ -4,7 +4,7 @@ import * as UserGQLArgs from './user.args.gql.js'
 import {userResolver} from './user.resolver.js'
 
 export class UserGQLSchema {
-  private userresolver:userResolver;
+  private userresolver: typeof userResolver;
     constructor(){
 this.userresolver = userResolver
     }

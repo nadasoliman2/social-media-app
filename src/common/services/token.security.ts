@@ -43,9 +43,9 @@ interface IDecodeTokenInput {
   tokenType?: TokenTypeEnum
 }
 
-interface IDecodedToken {
-  sub: Types.ObjectId,
-  aud: [TokenTypeEnum, RoleEnum]
+interface IDecodedToken extends JwtPayload {
+  sub: string
+  aud: string[]
   jti: string
   iat: number
 }
@@ -125,26 +125,30 @@ export const decodeToken = async (
   decoded: IDecodedToken
 }> => {
 
-  const decoded = jwt.decode(token) as IDecodedToken | null
+ const decodedRaw = jwt.decode(token)
 
-  if (!decoded) {
-     throw new BadRequestException( "Invalid token" )
-  }
+if (!decodedRaw || typeof decodedRaw === "string") {
+  throw new BadRequestException("Invalid token")
+}
 
+const decoded = decodedRaw as IDecodedToken
   const { sub, aud, jti, iat } = decoded
 
   if (!aud?.length) {
      throw new BadRequestException( "Missing token audience" )
   }
 
-  const [tokenApproach, level] = aud
+const [tokenApproachRaw, levelRaw] = aud
+
+const tokenApproach = tokenApproachRaw as unknown as TokenTypeEnum
+const level = levelRaw as unknown as RoleEnum
 
   if (tokenType !== tokenApproach) {
      throw new BadRequestException( "Unexpected token mechanism" )
   }
 
   // Check revoked session
-  if (jti && await redis.get( redis.revokeTokenKey({ userId: sub as Types.ObjectId, jti: jti as string }))) {
+  if (jti && await redis.get( redis.revokeTokenKey({ userId: sub  as string, jti: jti as string }))) {
      throw new UnauthorizedException( "Invalid login session" )
   }
 

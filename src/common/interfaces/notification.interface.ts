@@ -5,18 +5,18 @@ export interface INotification{
     
       actor:Types.ObjectId;
        
+        comment?:Types.ObjectId;
+     
+    
+      type:number;
         
      
     
-      type:String;
-        
-     
-    
-      post: Types.ObjectId;
+      post?: Types.ObjectId;
     
      
     
-      reactType: Number;
+      reactType?: Number;
      
     
       isRead:  Boolean;

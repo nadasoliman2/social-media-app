@@ -5,7 +5,7 @@ import { successResponse } from "../../common/response/success.response.js"
 import * as validators from "./post.validation.js"
 import PostService from "./post.service.js"
 import { paginateDto} from "../../common/validation/general.validation.js"
-import {createPostBodyDto,ReactPostParamsDto,ReactPostQueryDto,UpdatePostBodyDto,UpdatePostParamsDto} from './post.dto.js'
+import {createPostBodyDto,ReactPostParamsDto,ReactPostQueryDto,DeletePostParamsDto,UpdatePostBodyDto,UpdatePostParamsDto} from './post.dto.js'
 import {createPost,updatePost} from './post.validation.js'
 import {IUser} from '../../common/interfaces/user.interface.js'
 import {HydratedDocument} from "mongoose"
@@ -63,9 +63,8 @@ router.delete('/:postId',
     validation(validators.deletePost),
    
     async(req,res,next)=>{
-        console.log(req.user)
-        console.log(req.body)
-const data =await PostService.DeletePost(req.params as DeletepostParamsDto,req.user)
+       
+const data =await PostService.DeletePost(req.params as DeletePostParamsDto,req.user)
         return successResponse({res,status:201,message:"post delete successfully"})
 }
 )

@@ -15,7 +15,7 @@ import { CommentRepository } from "../../DB/repository/comment.repository.js";
 
 class UserService{
   private readonly redis: typeof RedisService
-  private readonly s3:s3service
+  private readonly s3: typeof s3service
   private readonly userrepository:UserRepository
     private readonly postrepository:PostRepository
     private readonly commentRepository:CommentRepository

@@ -33,24 +33,42 @@ app.use('/comment',commentRouter)
 // app.use('/sayHi',(req: express.Request, res: express.Response, next: express.NextFunction)=>{
 // return successResponse({res,data:{message:"hello world"}})
 // })
-app.get('/uploads/*path',async(req: express.Request, res: express.Response, next: express.NextFunction):Promise<express.Response> => {
-  const {download,fileName}= req.query as {download?:string,fileName?:string}
-  const {path}=req.params as {path:string[]}
-  const link =path.join("/")
-  const {Body,ContentType}= await s3service.getAsset({Key:link})
-  console.log({Body,ContentType})
+app.get(
+  "/uploads/*path",
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ): Promise<void> => {
+    const { download, fileName } = req.query as {
+      download?: string;
+      fileName?: string;
+    };
 
-  res.setHeader("Content-Type", ContentType || "application/octet-stream")
-  res.set("Cross-Origin-Resource-Policy","cross-origin")
+    const { path } = req.params as { path: string[] };
 
-  if(download==="true"){
-    res.setHeader(
-    "Content-Disposition",
-    `attachment; filename="${fileName || link.split("/").pop()}"`
-  )
+    const link = path.join("/");
+
+    const { Body, ContentType } = await s3service.getAsset({ Key: link });
+
+    console.log({ Body, ContentType });
+
+    res.setHeader("Content-Type", ContentType || "application/octet-stream");
+
+    res.set("Cross-Origin-Resource-Policy", "cross-origin");
+
+    if (download === "true") {
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${fileName || link.split("/").pop()}"`
+      );
+    }
+
+    await s3WriteStream(Body as NodeJS.ReadableStream, res);
+
+    return;
   }
-      return await s3WriteStream(Body as NodeJS.ReadableStream,res)
-    })
+);
     app.get('/pre-signed/*path',async(req: express.Request, res: express.Response, next: express.NextFunction):Promise<express.Response> => {
   const {download,fileName}= req.query as {download?:string,fileName?:string}
   const {path}=req.params as {path:string[]}

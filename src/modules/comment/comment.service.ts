@@ -212,8 +212,8 @@ async replyOnComment(
         actor: user._id,
         type: NotificationType.REPLY_COMMENT,
         post: postId,
-        comment: commentId,
-        reply: reply._id,
+        comment: reply._id,
+       
         isRead: false
       }
     })
@@ -248,7 +248,7 @@ async replyOnComment(
             type: "MENTION_COMMENT",
             post: postId,
             comment: commentId,
-            reply: reply._id,
+            
             isRead: false
           }
         })
@@ -423,10 +423,8 @@ const deleteComment=  await this.commentRepository.deleteMany({
     ],force:true
   }
 })
-if(!deleteComment?.deletedCount >0 ){
-    
-      
-        throw new BadRequestException("Failed to delete comment")
+if (deleteComment?.deletedCount! <= 0) {
+  throw new BadRequestException("Failed to delete comment")
 }
 console.log({deleteComment})
    

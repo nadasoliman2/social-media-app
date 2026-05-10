@@ -22,7 +22,10 @@ const NotificationSchema = new Schema({
 enum: NotificationType  ,
  required: true
   },
-
+comment: {
+  type: Types.ObjectId,
+  ref: "Comment"
+},
   post: {
     type: Types.ObjectId,
     ref: "Post"
