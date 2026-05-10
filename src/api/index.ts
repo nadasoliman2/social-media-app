@@ -1,5 +1,5 @@
-import app from "../src/app.bootstrap.js";
-import { connectDB, redisconnection } from "../src/DB/index.js"; // تأكدي من المسار
+import app from "../app.bootstrap.js";
+import { connectDB, redisconnection } from "../DB/index.js"; // تأكدي من المسار
 
 export default async function handler(req, res) {
     try {

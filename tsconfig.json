@@ -1,28 +1,16 @@
 {
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
-    "removeComments": true,
-    "noEmitOnError": false,
-    "module": "nodenext",
-    "target": "es2023",
-    "types": ["node"],
-    
-    // التعديلات الأساسية هنا عشان نتخطى الأخطاء:
-    "strict": false,               // هنقفل الـ Strict mode مؤقتاً
-    "noImplicitAny": false,        // مش هيشتم لو مفيش Type للـ req و res
-    "noUnusedLocals": false,       // مش هيفشل لو فيه متغير مش مستخدم
-    "noUnusedParameters": false,   // مش هيفشل لو فيه parameter مش مستخدم
-    "skipLibCheck": true,          // تخطي فحص المكتبات الخارجية
-    "allowJs": true,
-    
-    "jsx": "react-jsx",
-    "verbatimModuleSyntax": false,
-    "isolatedModules": true,
-    "moduleDetection": "force"
+
+    "module": "NodeNext",
+    "target": "ES2023",
+    "moduleResolution": "NodeNext",
+
+    "strict": false,
+    "skipLibCheck": true,
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*",
-    "api/**/*"
-  ]
+  "include": ["src/**/*", "src/api/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

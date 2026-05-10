@@ -83,9 +83,7 @@ return res.status(200).json(data)
     app.get('/*dummy', (req: express.Request, res: express.Response, next: express.NextFunction) => {
       return  res.status(404).json({message:"Invalid application routing"});
     });
-  await  connectDB()
-
-  await  redisconnection()
+ 
 app.use(globalErrorHandler);
 const userrepo = new UserRepository()
 //  const user= await userrepo.deleteOne(
